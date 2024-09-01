@@ -219,3 +219,20 @@ func (s Set[T]) Each() iter.Seq[T] {
 
 	return fn
 }
+
+// Has checks whether the set contains the given element.
+//
+// Parameters:
+//   - elem: The element to check.
+//
+// Returns:
+//   - bool: True if the set contains the element, false otherwise.
+func (s Set[T]) Has(elem T) bool {
+	for i := 0; i < len(s.values); i++ {
+		if s.values[i].Equals(elem) {
+			return true
+		}
+	}
+
+	return false
+}
