@@ -11,6 +11,9 @@ import (
 type Index struct {
 	// value is the index value.
 	value int
+
+	// max_value is the maximum index value.
+	max_value int
 }
 
 // Clean implements the pkg.Type interface.
@@ -18,7 +21,7 @@ func (idx *Index) Clean() {}
 
 // Equals implements the pkg.Type interface.
 //
-// Two indexes are equal if they have the same value.
+// Two indexes are equal if they have the same value; regardless of the max value.
 func (idx *Index) Equals(other pkg.Type) bool {
 	if other == nil {
 		panic(pkg.NewNilComparison("other"))
@@ -35,45 +38,75 @@ func (idx *Index) Equals(other pkg.Type) bool {
 // NewIndex creates a new index.
 //
 // Parameters:
-//   - value: The index value.
+//   - max_value: The maximum index value.
 //
 // Returns:
 //   - Index: The new index.
 //
-// Panics if the value is negative.
-func NewIndex(value int) Index {
-	if value < 0 {
-		panic(pkg.NewInvalidCall("value", errors.New("value must be non-negative")))
+// Panics if max_value is negative.
+func NewIndex(max_value int) Index {
+	if max_value < 0 {
+		panic(pkg.NewInvalidCall("max_value", errors.New("max_value must be non-negative")))
 	}
 
 	return Index{
-		value: value,
+		value:     0,
+		max_value: max_value,
 	}
 }
 
-// NewIndexOfSlice creates a new index of the length of the slice.
+// WithValue creates a new index with the given value.
 //
 // Parameters:
-//   - slice: The slice.
+//   - value: The value.
 //
 // Returns:
 //   - Index: The new index.
-func NewIndexOfSlice[T any](slice []T) Index {
+func (idx Index) WithValue(value int) Index {
+	if value >= idx.max_value {
+		panic(pkg.NewInvalidCall("value", errors.New("value must be less than max_value")))
+	}
+
 	return Index{
-		value: len(slice),
+		value:     value,
+		max_value: idx.max_value,
 	}
 }
 
-// Each creates an iterator that iterates over the index.
+// Value returns the index value.
 //
 // Returns:
-//   - iter.Seq[int]: The iterator. Never returns nil.
-func (idx *Index) Each() iter.Seq[int] {
-	fn := func(yield func(int) bool) {
-		for i := 0; i < idx.value; i++ {
-			if !yield(i) {
+//   - int: The index value.
+func (idx Index) Value() int {
+	return idx.value
+}
+
+// Set sets the index value.
+//
+// Parameters:
+//   - value: The new value.
+func (idx *Index) Set(value int) {
+	if value >= idx.max_value {
+		panic(pkg.NewInvalidCall("value", errors.New("value must be less than max_value")))
+	}
+
+	idx.value = value
+}
+
+// Each creates an iterator that iterates over the index from 0 up to the maximum value.
+//
+// Returns:
+//   - iter.Seq[*Index]: The iterator. Never returns nil.
+func (idx Index) Each() iter.Seq[*Index] {
+	fn := func(yield func(*Index) bool) {
+		other_idx := NewIndex(idx.max_value).WithValue(0)
+
+		for other_idx.value < idx.max_value {
+			if !yield(&other_idx) {
 				return
 			}
+
+			other_idx.value++
 		}
 	}
 
