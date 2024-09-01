@@ -122,3 +122,38 @@ func (s Slice[T]) Each() iter.Seq[T] {
 
 	return fn
 }
+
+// ElemAt returns the element at the given index.
+//
+// Parameters:
+//   - i: The index.
+//
+// Returns:
+//   - T: The element.
+//
+// Panic with the message "index out of range" if the index is out of range.
+func (s Slice[T]) ElemAt(i *Int) T {
+	if i == nil {
+		panic(pkg.NewInvalidCall("i", pkg.NewNilValue()))
+	}
+	val := i.Value()
+
+	if val < 0 || val >= len(s.values) {
+		panic("index out of range")
+	}
+
+	return s.values[val]
+}
+
+// Copy creates a copy of the slice.
+//
+// Returns:
+//   - Slice[T]: The copy.
+func (s Slice[T]) Copy() Slice[T] {
+	values := make([]T, len(s.values))
+	copy(values, s.values)
+
+	return Slice[T]{
+		values: values,
+	}
+}

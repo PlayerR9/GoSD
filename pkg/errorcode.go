@@ -21,6 +21,12 @@ const (
 	// Example:
 	// 	foo.Call()
 	InvalidCall
+
+	// NilValue happens when a nil value is used but it was expected a non-nil value.
+	//
+	// Example:
+	// 	foo.Value(nil)
+	NilValue
 )
 
 // NewNilComparison creates a new error with the NilComparison error code.
@@ -51,5 +57,16 @@ func NewInvalidCall(de_name string, reason error) *Err {
 		Code:        InvalidCall,
 		Msg:         reason,
 		Suggestions: []string{fmt.Sprintf("ensure that data entity (%s) is valid", de_name)},
+	}
+}
+
+// NewNilValue creates a new error with the NilValue error code.
+//
+// Returns:
+//   - *Err: The new error. Never returns nil.
+func NewNilValue() *Err {
+	return &Err{
+		Code: NilValue,
+		Msg:  errors.New("value expected to be non-nil"),
 	}
 }

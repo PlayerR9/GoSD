@@ -64,9 +64,16 @@ func Equals(a, b Type) bool {
 // DoFunc is a function that does something. It must panic when error
 // happens; regardless of the error.
 //
+// Returns:
+//   - O: the result of the function.
+type DoFunc[O Type] func() O
+
+// DoWithArgFunc is a function that does something. It must panic when error
+// happens; regardless of the error.
+//
 // Parameters:
 //   - arg: the input of the function.
 //
 // Returns:
 //   - O: the result of the function.
-type DoFunc[I, O Type] func(arg I) O
+type DoWithArgFunc[I, O Type] func(arg I) O

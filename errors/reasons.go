@@ -1,19 +1,8 @@
 package errors
 
 import (
-	"errors"
 	"fmt"
 )
-
-var (
-	// NilValue is the error returned when a pointer is nil. While readers are not expected to return this
-	// error by itself, if it does, readers must not wrap it as callers will test this error using ==.
-	NilValue error
-)
-
-func init() {
-	NilValue = errors.New("pointer must not be nil")
-}
 
 // ErrPanic represents an error when a function panics.
 type ErrPanic struct {

@@ -38,3 +38,25 @@ func Contains[T Type](elems []T, elem T) bool {
 
 	return false
 }
+
+// IndexOf gets the index of the given element in the given slice.
+//
+// Parameters:
+//   - elems: The slice to check.
+//   - elem: The element to check.
+//
+// Returns:
+//   - int: The index of the element in the slice, or -1 if the element is not found.
+func IndexOf[T Type](elems []T, elem T) int {
+	if len(elems) == 0 {
+		return -1
+	}
+
+	for i := 0; i < len(elems); i++ {
+		if elems[i].Equals(elem) {
+			return i
+		}
+	}
+
+	return -1
+}
