@@ -27,6 +27,19 @@ const (
 	// Example:
 	// 	foo.Value(nil)
 	NilValue
+
+	// InvalidState happens when a method is called on an object that is in an invalid state.
+	//
+	// Example:
+	// 	var obj *Slice[*Int]
+	// 	obj.Append(NewInt().WithValue(42))
+	InvalidState
+
+	// IllegalArgument happens when a method is called with an illegal argument.
+	//
+	// Example:
+	// 	foo.Call(42)
+	IllegalArgument
 )
 
 // NewNilComparison creates a new error with the NilComparison error code.
@@ -68,5 +81,34 @@ func NewNilValue() *Err {
 	return &Err{
 		Code: NilValue,
 		Msg:  errors.New("value expected to be non-nil"),
+	}
+}
+
+// NewInvalidState creates a new error with the InvalidState error code.
+//
+// Parameters:
+//   - state: The state that is invalid.
+//   - msg: The reason for the error.
+//
+// Returns:
+//   - *Err: The new error. Never returns nil.
+func NewInvalidState(state string, msg error) *Err {
+	return &Err{
+		Code: InvalidState,
+		Msg:  fmt.Errorf("state (%s) is invalid: %w", state, msg),
+	}
+}
+
+// NewIllegalArgument creates a new error with the IllegalArgument error code.
+//
+// Parameters:
+//   - msg: The reason for the error.
+//
+// Returns:
+//   - *Err: The new error. Never returns nil.
+func NewIllegalArgument(msg error) *Err {
+	return &Err{
+		Code: IllegalArgument,
+		Msg:  msg,
 	}
 }

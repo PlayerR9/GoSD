@@ -18,6 +18,13 @@ type Tree[T interface {
 	root T
 }
 
+// Ensure implements the pkg.Type interface.
+func (t *Tree[T]) Ensure() {
+	pkg.ThrowIf(t == nil, pkg.NewInvalidState("t", pkg.NewNilValue()))
+
+	t.root.Ensure()
+}
+
 // Clean implements the pkg.Type interface.
 func (t *Tree[T]) Clean() {
 	if t == nil {
@@ -31,16 +38,15 @@ func (t *Tree[T]) Clean() {
 //
 // Two trees are equal if they have the same root node.
 func (t *Tree[T]) Equals(other pkg.Type) bool {
-	if other == nil {
-		panic(pkg.NewNilComparison("other"))
-	}
+	pkg.Ensure(false, t)
+	pkg.Ensure(false, other)
 
-	other_val, ok := other.(*Tree[T])
-	if !ok {
+	switch other := other.(type) {
+	case *Tree[T]:
+		return t.root.Equals(other.root)
+	default:
 		return false
 	}
-
-	return t.root.Equals(other_val.root)
 }
 
 // GoString implements the fmt.GoStringer interface.
@@ -49,7 +55,7 @@ func (t Tree[T]) GoString() string {
 
 	info, err := ApplyDFS(&t, trav)
 	if err != nil {
-		panic(err.Error())
+		pkg.Throw(err)
 	}
 
 	return info.String()

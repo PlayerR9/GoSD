@@ -1,9 +1,58 @@
-package errors
+package pkg
 
 import (
-	assert "github.com/PlayerR9/GoSD/assert"
-	pkg "github.com/PlayerR9/GoSD/pkg"
+	"errors"
+	"fmt"
 )
+
+// ErrPanic represents an error when a function panics.
+type ErrPanic struct {
+	// Value is the value that caused the error.
+	Value any
+}
+
+// Error implements the error interface.
+//
+// Message: "panic: {value}"
+func (e ErrPanic) Error() string {
+	return fmt.Sprintf("panic: %v", e.Value)
+}
+
+// NewErrPanic creates a new ErrPanic error.
+//
+// Parameters:
+//   - value: The value that caused the error.
+//
+// Returns:
+//   - *ErrPanic: A pointer to the newly created ErrPanic. Never returns nil.
+func NewErrPanic(value any) *ErrPanic {
+	return &ErrPanic{
+		Value: value,
+	}
+}
+
+// IsPanic checks if the error is an ErrPanic.
+//
+// Parameters:
+//   - err: The error to check.
+//
+// Returns:
+//   - any: The value that caused the error.
+//   - bool: True if the error is an ErrPanic, false otherwise.
+func IsPanic(err error) (any, bool) {
+	if err == nil {
+		return nil, false
+	}
+
+	var panic_err *ErrPanic
+
+	ok := errors.As(err, &panic_err)
+	if ok {
+		return panic_err.Value, true
+	}
+
+	return nil, false
+}
 
 // ErrOf calls the given DoFunc and returns the result and error.
 //
@@ -13,8 +62,8 @@ import (
 // Returns:
 //   - T: The result of the DoFunc.
 //   - error: The error that occurred.
-func ErrOf[O pkg.Type](do pkg.DoFunc[O]) (O, error) {
-	assert.AssertNotNil(do, "do")
+func ErrOf[O Type](do DoFunc[O]) (O, error) {
+	ThrowIf(do == nil, NewInvalidCall("do", NewNilValue()))
 
 	var reason error
 
@@ -47,8 +96,8 @@ func ErrOf[O pkg.Type](do pkg.DoFunc[O]) (O, error) {
 // Returns:
 //   - T: The result of the DoFunc.
 //   - error: The error that occurred.
-func ErrWithArgOf[I, O pkg.Type](arg I, do pkg.DoWithArgFunc[I, O]) (O, error) {
-	assert.AssertNotNil(do, "do")
+func ErrWithArgOf[I any, O Type](arg I, do DoWithArgFunc[I, O]) (O, error) {
+	ThrowIf(do == nil, NewInvalidCall("do", NewNilValue()))
 
 	var reason error
 
@@ -80,7 +129,7 @@ func ErrWithArgOf[I, O pkg.Type](arg I, do pkg.DoWithArgFunc[I, O]) (O, error) {
 //
 // Returns:
 //   - T: The result of the function.
-type ErrHandler[T pkg.Type] func(res T, err error) T
+type ErrHandler[T Type] func(res T, err error) T
 
 // Try calls the given DoFunc and executes the given exec function if an error occurs.
 //
@@ -91,13 +140,16 @@ type ErrHandler[T pkg.Type] func(res T, err error) T
 //
 // Returns:
 //   - O	: The result of the DoFunc.
-func Try[O pkg.Type](do pkg.DoFunc[O], exec ErrHandler[O]) O {
+func Try[O Type](do DoFunc[O], exec ErrHandler[O]) O {
 	res, err := ErrOf(do)
 	if err == nil {
 		return res
 	}
 
-	if exec == nil {
+	val, ok := IsPanic(err)
+	if ok {
+		panic(val)
+	} else if exec == nil {
 		panic(err)
 	}
 
@@ -113,13 +165,16 @@ func Try[O pkg.Type](do pkg.DoFunc[O], exec ErrHandler[O]) O {
 //
 // Returns:
 //   - O	: The result of the DoFunc.
-func TryWithArg[I, O pkg.Type](arg I, do pkg.DoWithArgFunc[I, O], exec ErrHandler[O]) O {
+func TryWithArg[I any, O Type](arg I, do DoWithArgFunc[I, O], exec ErrHandler[O]) O {
 	res, err := ErrWithArgOf(arg, do)
 	if err == nil {
 		return res
 	}
 
-	if exec == nil {
+	val, ok := IsPanic(err)
+	if ok {
+		panic(val)
+	} else if exec == nil {
 		panic(err)
 	}
 

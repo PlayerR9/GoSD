@@ -8,6 +8,11 @@ type Int struct {
 	value int
 }
 
+// Ensure implements the pkg.Type interface.
+func (idx *Int) Ensure() {
+	pkg.ThrowIf(idx == nil, pkg.NewInvalidState("idx", pkg.NewNilValue()))
+}
+
 // Clean implements the pkg.Type interface.
 func (idx *Int) Clean() {}
 
@@ -15,24 +20,23 @@ func (idx *Int) Clean() {}
 //
 // Two indexes are equal if they have the same value; regardless of the max value.
 func (idx *Int) Equals(other pkg.Type) bool {
-	if other == nil {
-		panic(pkg.NewNilComparison("other"))
-	}
+	pkg.Ensure(false, idx)
+	pkg.Ensure(false, other)
 
-	other_val, ok := other.(*Int)
-	if !ok {
+	switch other := other.(type) {
+	case *Int:
+		return idx.value == other.value
+	default:
 		return false
 	}
-
-	return idx.value == other_val.value
 }
 
 // NewIndex creates a new index.
 //
 // Returns:
-//   - Int: The new index.
-func NewInt() Int {
-	return Int{
+//   - *Int: The new index. Never returns nil.
+func NewInt() *Int {
+	return &Int{
 		value: 0,
 	}
 }
@@ -43,11 +47,17 @@ func NewInt() Int {
 //   - value: The value.
 //
 // Returns:
-//   - Int: The new index.
-func (idx Int) WithValue(value int) Int {
-	return Int{
-		value: value,
+//   - *Int: The new index. Never returns nil.
+func (idx *Int) WithValue(value int) *Int {
+	if idx == nil {
+		return &Int{
+			value: value,
+		}
 	}
+
+	idx.value = value
+
+	return idx
 }
 
 // Value returns the index value.
@@ -63,5 +73,7 @@ func (idx Int) Value() int {
 // Parameters:
 //   - value: The new value.
 func (idx *Int) Set(value int) {
+	pkg.Ensure(false, idx)
+
 	idx.value = value
 }

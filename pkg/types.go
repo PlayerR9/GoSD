@@ -13,8 +13,32 @@ type Type interface {
 	// Returns:
 	//   - bool: True if the types are equal, false otherwise.
 	//
+	// Throws:
+	//   - *NilComparison: If the receiver or other is nil.
+	//   - any other error: Depend on the implementation.
+	//
 	// Each implementation must describe the behavior of the equals function.
 	Equals(other Type) bool
+
+	// Ensure ensures that the type's state is valid. If not, it panics.
+	Ensure()
+}
+
+// Ensure ensures that the type's state is valid. If not, it panics.
+//
+// Parameters:
+//   - allow_nil: Whether to allow nil values.
+//   - type_: The type to ensure.
+func Ensure(allow_nil bool, type_ Type) {
+	if type_ == nil {
+		if allow_nil {
+			return
+		}
+
+		Throw(NewInvalidCall("type_", NewNilValue()))
+	}
+
+	type_.Ensure()
 }
 
 // Clean cleans up the type.
@@ -76,4 +100,4 @@ type DoFunc[O Type] func() O
 //
 // Returns:
 //   - O: the result of the function.
-type DoWithArgFunc[I, O Type] func(arg I) O
+type DoWithArgFunc[I any, O Type] func(arg I) O

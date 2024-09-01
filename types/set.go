@@ -12,6 +12,11 @@ type Set[T pkg.Type] struct {
 	values []T
 }
 
+// Ensure implements the pkg.Type interface.
+func (s *Set[T]) Ensure() {
+	pkg.ThrowIf(s == nil, pkg.NewInvalidState("s", pkg.NewNilValue()))
+}
+
 // Clean implements the pkg.Type interface.
 func (s *Set[T]) Clean() {
 	if s == nil {
@@ -26,34 +31,33 @@ func (s *Set[T]) Clean() {
 //
 // Two sets are equal if they have the same values.
 func (s *Set[T]) Equals(other pkg.Type) bool {
-	if other == nil {
-		panic(pkg.NewNilComparison("other"))
-	}
+	pkg.Ensure(false, s)
+	pkg.Ensure(false, other)
 
-	other_val, ok := other.(*Set[T])
-	if !ok {
-		return false
-	}
-
-	if len(s.values) != len(other_val.values) {
-		return false
-	}
-
-	for i := 0; i < len(s.values); i++ {
-		if !s.values[i].Equals(other_val.values[i]) {
+	switch other := other.(type) {
+	case *Set[T]:
+		if len(s.values) != len(other.values) {
 			return false
 		}
-	}
 
-	return true
+		for i := 0; i < len(s.values); i++ {
+			if !s.values[i].Equals(other.values[i]) {
+				return false
+			}
+		}
+
+		return true
+	default:
+		return false
+	}
 }
 
 // NewSet creates a new empty set.
 //
 // Returns:
-//   - Set: The new set.
-func NewSet[T pkg.Type]() Set[T] {
-	return Set[T]{
+//   - *Set: The new set. Never returns nil.
+func NewSet[T pkg.Type]() *Set[T] {
+	return &Set[T]{
 		values: make([]T, 0),
 	}
 }
@@ -64,8 +68,8 @@ func NewSet[T pkg.Type]() Set[T] {
 //   - slice: The slice.
 //
 // Returns:
-//   - Set: The new set.
-func (s Set[T]) WithValue(slice []T) Set[T] {
+//   - *Set: The new set. Never returns nil.
+func (s *Set[T]) WithValue(slice []T) *Set[T] {
 	var unique []T
 
 	for i := 0; i < len(slice); i++ {
@@ -74,9 +78,16 @@ func (s Set[T]) WithValue(slice []T) Set[T] {
 		}
 	}
 
-	return Set[T]{
-		values: unique,
+	if s == nil {
+		return &Set[T]{
+			values: unique,
+		}
 	}
+
+	s.values = pkg.CleanSlice(s.values)
+	s.values = unique
+
+	return s
 }
 
 // IsEmpty checks whether the set is empty.
@@ -103,6 +114,8 @@ func (s Set[T]) Size() int {
 // Returns:
 //   - bool: True if the element was added, false otherwise.
 func (s *Set[T]) Add(elem T) bool {
+	pkg.Ensure(false, s)
+
 	has := pkg.Contains(s.values, elem)
 	if !has {
 		s.values = append(s.values, elem)
@@ -119,6 +132,8 @@ func (s *Set[T]) Add(elem T) bool {
 // Returns:
 //   - int: The number of elements added.
 func (s *Set[T]) Union(other *Set[T]) int {
+	pkg.Ensure(false, s)
+
 	if other == nil {
 		return 0
 	}

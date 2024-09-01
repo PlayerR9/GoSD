@@ -11,11 +11,12 @@ func _() {
 	_ = x[NilComparison-0]
 	_ = x[InvalidCall-1]
 	_ = x[NilValue-2]
+	_ = x[InvalidState-3]
 }
 
-const _ErrorCode_name = "NilComparisonInvalidCallNilValue"
+const _ErrorCode_name = "NilComparisonInvalidCallNilValueInvalidState"
 
-var _ErrorCode_index = [...]uint8{0, 13, 24, 32}
+var _ErrorCode_index = [...]uint8{0, 13, 24, 32, 44}
 
 func (i ErrorCode) String() string {
 	if i < 0 || i >= ErrorCode(len(_ErrorCode_index)-1) {

@@ -1,5 +1,26 @@
 package pkg
 
+// Throw panic with the given error if it is not nil.
+//
+// Parameters:
+//   - err: The error to throw.
+func Throw(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+// ThrowIf panics with the given error if the given condition is true.
+//
+// Parameters:
+//   - cond: The condition to check.
+//   - err: The error to throw.
+func ThrowIf(cond bool, err error) {
+	if cond && err != nil {
+		panic(err)
+	}
+}
+
 // Error returns the error message of an error.
 //
 // Parameters:

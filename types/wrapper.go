@@ -8,6 +8,11 @@ type Wrap[T comparable] struct {
 	value T
 }
 
+// Ensure implements the pkg.Type interface.
+func (w *Wrap[T]) Ensure() {
+	pkg.ThrowIf(w == nil, pkg.NewInvalidState("w", pkg.NewNilValue()))
+}
+
 // Clean implements the pkg.Type interface.
 func (w *Wrap[T]) Clean() {}
 
@@ -15,16 +20,15 @@ func (w *Wrap[T]) Clean() {}
 //
 // Two wraps are equal if they have the same value adn are both wraps.
 func (w *Wrap[T]) Equals(other pkg.Type) bool {
-	if other == nil {
-		panic(pkg.NewNilComparison("other"))
-	}
+	pkg.Ensure(false, w)
+	pkg.Ensure(false, other)
 
-	other_val, ok := other.(*Wrap[T])
-	if !ok {
+	switch other := other.(type) {
+	case *Wrap[T]:
+		return w.value == other.value
+	default:
 		return false
 	}
-
-	return w.value == other_val.value
 }
 
 // NewWrap creates a new wrap.
