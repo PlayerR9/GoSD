@@ -1,11 +1,27 @@
 package types
 
-import "github.com/PlayerR9/GoSD/pkg"
+import (
+	"fmt"
+
+	"github.com/PlayerR9/GoSD/pkg"
+)
 
 // Wrap is a wrapper.
 type Wrap[T comparable] struct {
 	// value is the wrapped value.
 	value T
+}
+
+// String implements the fmt.Stringer interface.
+func (w *Wrap[T]) String() string {
+	return fmt.Sprint(w.value)
+}
+
+// DeepCopy implements the pkg.Type interface.
+func (w *Wrap[T]) DeepCopy() pkg.Type {
+	return &Wrap[T]{
+		value: w.value,
+	}
 }
 
 // Ensure implements the pkg.Type interface.

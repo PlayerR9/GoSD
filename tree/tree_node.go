@@ -1,8 +1,6 @@
 package tree
 
 import (
-	"fmt"
-
 	"github.com/PlayerR9/GoSD/pkg"
 )
 
@@ -15,7 +13,6 @@ type TreeNoder interface {
 	IsLeaf() bool
 
 	comparable
-	fmt.GoStringer
 
 	pkg.Type
 }

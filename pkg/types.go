@@ -1,7 +1,15 @@
 package pkg
 
+import "fmt"
+
 // Type is an interface that describes the behaviors of a SD type.
 type Type interface {
+	// String returns a string representation of the type.
+	//
+	// Returns:
+	//   - string: The string representation of the type.
+	String() string
+
 	// Clean cleans up the type.
 	Clean()
 
@@ -22,6 +30,28 @@ type Type interface {
 
 	// Ensure ensures that the type's state is valid. If not, it panics.
 	Ensure()
+
+	// DeepCopy creates a deep copy of the type.
+	//
+	// Returns:
+	//   - Type: The deep copy.
+	DeepCopy() Type
+}
+
+// DeepCopy creates a deep copy of the type.
+//
+// Parameters:
+//   - type_: The type to copy.
+//
+// Returns:
+//   - T: The deep copy.
+func DeepCopy[T Type](type_ T) T {
+	type_copy := type_.DeepCopy()
+
+	tmp, ok := type_copy.(T)
+	ThrowIf(!ok, NewInvalidState("type_copy", fmt.Errorf("invalid type: %T", type_)))
+
+	return tmp
 }
 
 // Ensure ensures that the type's state is valid. If not, it panics.

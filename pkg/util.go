@@ -81,3 +81,20 @@ func IndexOf[T Type](elems []T, elem T) int {
 
 	return -1
 }
+
+// OrElse returns the first value if the condition is true, otherwise the second value.
+//
+// Parameters:
+//   - cond: The condition to check.
+//   - a: The first value if the condition is true.
+//   - b: The second value if the condition is false.
+//
+// Returns:
+//   - T: The first value if the condition is true, otherwise the second value.
+func OrElse[T any](cond bool, a, b T) T {
+	if cond {
+		return a
+	} else {
+		return b
+	}
+}

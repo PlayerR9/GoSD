@@ -1,8 +1,10 @@
 package slices
 
 import (
+	"errors"
 	"fmt"
 	"iter"
+	"strings"
 
 	"github.com/PlayerR9/GoSD/pkg"
 )
@@ -11,6 +13,45 @@ import (
 type Slice[T pkg.Type] struct {
 	// values is the slice values.
 	values []T
+}
+
+// String implements the fmt.Stringer interface.
+func (s *Slice[T]) String() string {
+	var builder strings.Builder
+
+	builder.WriteString("Slice[")
+
+	values := make([]string, 0, len(s.values))
+	for i := 0; i < len(s.values); i++ {
+		values = append(values, s.values[i].String())
+	}
+	builder.WriteString(strings.Join(values, ", "))
+
+	builder.WriteString("]")
+
+	return builder.String()
+}
+
+// DeepCopy implements the pkg.Type interface.
+func (s *Slice[T]) DeepCopy() pkg.Type {
+	if s == nil {
+		return nil
+	}
+
+	slice := make([]T, 0, len(s.values))
+
+	for _, v := range s.values {
+		v_copy := v.DeepCopy()
+
+		tmp, ok := v_copy.(T)
+		pkg.ThrowIf(!ok, pkg.NewInvalidState("v_copy", errors.New("invalid type")))
+
+		slice = append(slice, tmp)
+	}
+
+	return &Slice[T]{
+		values: slice,
+	}
 }
 
 // Ensure implements the pkg.Type interface.
@@ -197,4 +238,54 @@ func (s Slice[T]) Copy() Slice[T] {
 	return Slice[T]{
 		values: values,
 	}
+}
+
+// DeleteFirst deletes the first element in the slice.
+//
+// Returns:
+//   - T: The deleted element.
+func (s *Slice[T]) DeleteFirst() T {
+	pkg.Ensure(false, s)
+
+	pkg.ThrowIf(len(s.values) == 0, fmt.Errorf("slice is empty"))
+
+	top := s.values[0]
+	s.values = s.values[1:]
+
+	return top
+}
+
+// SetAt sets the element at the given index.
+//
+// Parameters:
+//   - i: The index.
+//   - elem: The element.
+//
+// Panics with the message "index out of range" if the index is out of range.
+func (s *Slice[T]) SetAt(i *Index[T], elem T) {
+	pkg.Ensure(false, s)
+	pkg.Ensure(false, i)
+
+	pkg.ThrowIf(i.ref != s, fmt.Errorf("index refers to a different slice: %p", i.ref))
+
+	s.values[i.value] = elem
+}
+
+// Has checks whether the slice contains the given element.
+//
+// Parameters:
+//   - elem: The element.
+//
+// Returns:
+//   - bool: True if the slice contains the element, false otherwise.
+func (s *Slice[T]) Has(elem T) bool {
+	pkg.Ensure(false, s)
+
+	for i := 0; i < len(s.values); i++ {
+		if s.values[i].Equals(elem) {
+			return true
+		}
+	}
+
+	return false
 }

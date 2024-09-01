@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"errors"
 	"iter"
 
 	"github.com/PlayerR9/GoSD/pkg"
@@ -16,6 +17,34 @@ type Tree[T interface {
 }] struct {
 	// root is the root node of the tree.
 	root T
+}
+
+// String implements the fmt.Stringer interface.
+func (t Tree[T]) String() string {
+	trav := PrintFn[T]()
+
+	info, err := ApplyDFS(&t, trav)
+	if err != nil {
+		pkg.Throw(err)
+	}
+
+	return info.String()
+}
+
+// DeepCopy implements the pkg.Type interface.
+func (t *Tree[T]) DeepCopy() pkg.Type {
+	if t == nil {
+		return nil
+	}
+
+	root_copy := t.root.DeepCopy()
+
+	tmp, ok := root_copy.(T)
+	pkg.ThrowIf(!ok, pkg.NewInvalidState("root_copy", errors.New("invalid type")))
+
+	return &Tree[T]{
+		root: tmp,
+	}
 }
 
 // Ensure implements the pkg.Type interface.
@@ -47,18 +76,6 @@ func (t *Tree[T]) Equals(other pkg.Type) bool {
 	default:
 		return false
 	}
-}
-
-// GoString implements the fmt.GoStringer interface.
-func (t Tree[T]) GoString() string {
-	trav := PrintFn[T]()
-
-	info, err := ApplyDFS(&t, trav)
-	if err != nil {
-		pkg.Throw(err)
-	}
-
-	return info.String()
 }
 
 // NewTree creates a new tree with the given root node.

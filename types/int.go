@@ -1,11 +1,27 @@
 package types
 
-import "github.com/PlayerR9/GoSD/pkg"
+import (
+	"strconv"
+
+	"github.com/PlayerR9/GoSD/pkg"
+)
 
 // Int is an index.
 type Int struct {
 	// value is the index value.
 	value int
+}
+
+// String implements the fmt.Stringer interface.
+func (idx *Int) String() string {
+	return strconv.Itoa(idx.value)
+}
+
+// DeepCopy implements the pkg.Type interface.
+func (idx *Int) DeepCopy() pkg.Type {
+	return &Int{
+		value: idx.value,
+	}
 }
 
 // Ensure implements the pkg.Type interface.

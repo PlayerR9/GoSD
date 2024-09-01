@@ -142,7 +142,7 @@ func PrintFn[N interface {
 			return nil, nil
 		}
 
-		builder.WriteString(info.node.GoString())
+		builder.WriteString(info.node.String())
 		info.global.AppendLine(builder.String())
 
 		info.global.SetSeen(info.node)

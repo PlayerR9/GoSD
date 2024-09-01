@@ -12,6 +12,22 @@ type Bool struct {
 	value bool
 }
 
+// String implements the pkg.Type interface.
+func (b *Bool) String() string {
+	if b.value {
+		return "T"
+	} else {
+		return "F"
+	}
+}
+
+// DeepCopy implements the pkg.Type interface.
+func (b *Bool) DeepCopy() pkg.Type {
+	return &Bool{
+		value: b.value,
+	}
+}
+
 // Ensure implements the pkg.Type interface.
 func (b *Bool) Ensure() {
 	pkg.ThrowIf(b == nil, pkg.NewInvalidState("b", pkg.NewNilValue()))
