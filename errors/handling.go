@@ -8,12 +8,13 @@ import (
 // ErrOf calls the given DoFunc and returns the result and error.
 //
 // Parameters:
+//   - arg: The argument to the DoFunc.
 //   - do: The DoFunc to call.
 //
 // Returns:
 //   - T: The result of the DoFunc.
 //   - error: The error that occurred.
-func ErrOf[T pkg.Type](do pkg.DoFunc[T]) (T, error) {
+func ErrOf[I, O pkg.Type](arg I, do pkg.DoFunc[I, O]) (O, error) {
 	assert.AssertNotNil(do, "do")
 
 	var reason error
@@ -33,7 +34,7 @@ func ErrOf[T pkg.Type](do pkg.DoFunc[T]) (T, error) {
 		reason = err
 	}()
 
-	res := do()
+	res := do(arg)
 
 	return res, reason
 }
@@ -41,22 +42,24 @@ func ErrOf[T pkg.Type](do pkg.DoFunc[T]) (T, error) {
 // ErrHandler is a function that handles an error.
 //
 // Parameters:
+//   - res: The result of the function.
 //   - err: The error that occurred. Assume this is not nil.
 //
 // Returns:
 //   - T: The result of the function.
-type ErrHandler[T pkg.Type] func(err error) T
+type ErrHandler[T pkg.Type] func(res T, err error) T
 
 // Try calls the given DoFunc and executes the given exec function if an error occurs.
 //
 // Parameters:
+//   - arg: The argument to pass to the DoFunc.
 //   - do: The DoFunc to call.
 //   - exec: The function to execute if an error occurs. If nil, the error is rethrown.
 //
 // Returns:
-//   - T: The result of the DoFunc.
-func Try[T pkg.Type](do pkg.DoFunc[T], exec ErrHandler[T]) T {
-	res, err := ErrOf(do)
+//   - O	: The result of the DoFunc.
+func Try[I, O pkg.Type](arg I, do pkg.DoFunc[I, O], exec ErrHandler[O]) O {
+	res, err := ErrOf(arg, do)
 	if err == nil {
 		return res
 	}
@@ -65,5 +68,5 @@ func Try[T pkg.Type](do pkg.DoFunc[T], exec ErrHandler[T]) T {
 		panic(err)
 	}
 
-	return exec(err)
+	return exec(res, err)
 }

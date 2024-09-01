@@ -58,14 +58,14 @@ func NewSet[T pkg.Type]() Set[T] {
 	}
 }
 
-// NewSetOfSlice creates a new set of the length of the slice.
+// WithValue set the values of the set.
 //
 // Parameters:
 //   - slice: The slice.
 //
 // Returns:
 //   - Set: The new set.
-func NewSetOfSlice[T pkg.Type](slice []T) Set[T] {
+func (s Set[T]) WithValue(slice []T) Set[T] {
 	var unique []T
 
 	for i := 0; i < len(slice); i++ {
