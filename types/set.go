@@ -51,9 +51,9 @@ func (s *Set[T]) Equals(other pkg.Type) bool {
 // NewSet creates a new empty set.
 //
 // Returns:
-//   - *Set: The new set. Never returns nil.
-func NewSet[T pkg.Type]() *Set[T] {
-	return &Set[T]{
+//   - Set: The new set.
+func NewSet[T pkg.Type]() Set[T] {
+	return Set[T]{
 		values: make([]T, 0),
 	}
 }
@@ -64,8 +64,8 @@ func NewSet[T pkg.Type]() *Set[T] {
 //   - slice: The slice.
 //
 // Returns:
-//   - *Set: The new set. Never returns nil.
-func NewSetOfSlice[T pkg.Type](slice []T) *Set[T] {
+//   - Set: The new set.
+func NewSetOfSlice[T pkg.Type](slice []T) Set[T] {
 	var unique []T
 
 	for i := 0; i < len(slice); i++ {
@@ -74,7 +74,7 @@ func NewSetOfSlice[T pkg.Type](slice []T) *Set[T] {
 		}
 	}
 
-	return &Set[T]{
+	return Set[T]{
 		values: unique,
 	}
 }
